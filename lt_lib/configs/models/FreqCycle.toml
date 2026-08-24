@@ -1,0 +1,11 @@
+[model]
+name = "FreqCycle"
+
+[model.params]
+enc_in = 7
+cycle = 24
+seg_len = 48
+seg_stride = 24
+d_model = 256
+dropout = 0.1
+use_revin = true

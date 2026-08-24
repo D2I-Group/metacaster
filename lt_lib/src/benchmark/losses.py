@@ -1,0 +1,12 @@
+
+from __future__ import annotations
+
+import torch.nn as nn
+
+from benchmark.registry import LOSS_REGISTRY
+
+
+def register() -> None:
+    LOSS_REGISTRY.register("mse", lambda **kwargs: nn.MSELoss(**kwargs))
+    LOSS_REGISTRY.register("mae", lambda **kwargs: nn.L1Loss(**kwargs))
+    LOSS_REGISTRY.register("l1", lambda **kwargs: nn.L1Loss(**kwargs))

@@ -1,0 +1,12 @@
+[model]
+name = "PatchTSMixer"
+
+[model.params]
+enc_in = 7
+patch_len = 16
+stride = 8
+d_model = 64
+expansion_factor = 2
+e_layers = 2
+dropout = 0.1
+use_revin = true
