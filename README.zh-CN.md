@@ -2,7 +2,8 @@
 
 # (EMNLP2026) MetaCaster: Meta-Harness-Optimized Agent for End-to-End Few-Shot Learning of Lightweight Time Series Forecasters
 
-[![Paper](https://img.shields.io/badge/EMNLP-2026-b31b1b.svg)](https://arxiv.org/abs/2608.23473)![Python](https://img.shields.io/badge/Python-3.12-blue.svg)
+![Paper](https://img.shields.io/badge/EMNLP-2026-b31b1b.svg)](https://arxiv.org/abs/2608.23473)
+![Python](https://img.shields.io/badge/Python-3.12-blue.svg)
 ![Forecasting](https://img.shields.io/badge/Forecasting-Time_Series-2ea44f.svg)
 ![Agent](https://img.shields.io/badge/Agent-Meta_Harness-8a2be2.svg)
 
