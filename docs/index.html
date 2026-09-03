@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MetaCaster — Meta-Harness-Optimized Agent for Few-Shot Learning of Lightweight Time Series Forecasters</title>
+<meta name="description" content="MetaCaster (EMNLP 2026) is a meta-harness-optimized multi-agent framework that trains specialized lightweight time series forecasters from only a few examples and textual context.">
+<meta name="author" content="ChengAo Shen, Wenchao Yu, Fangyu Wu, Dongjin Song, Hanghang Tong, Dongsheng Luo, Wei Cheng, Haifeng Chen, Jingchao Ni">
+<meta name="keywords" content="time series forecasting, few-shot learning, LLM agents, agent harness, lightweight forecasters, EMNLP 2026, MetaCaster, LT-Lib">
+<link rel="canonical" href="https://d2i-group.github.io/metacaster/">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://d2i-group.github.io/metacaster/">
+<meta property="og:title" content="MetaCaster: Meta-Harness-Optimized Agent for End-to-End Few-Shot Learning of Lightweight Time Series Forecasters">
+<meta property="og:description" content="EMNLP 2026 — agents act not as forecasters but as intermediary engineers that prepare efficient, task-specific forecasters for deployment.">
+<meta property="og:image" content="https://d2i-group.github.io/metacaster/assets/fig2.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="MetaCaster (EMNLP 2026)">
+<meta name="twitter:description" content="Few-shot learning of lightweight time series forecasters via a meta-harness-optimized multi-agent framework.">
+<meta name="twitter:image" content="https://d2i-group.github.io/metacaster/assets/fig2.png">
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23f6f5f1'/><path d='M16 68 L34 42 L50 58 L66 26 L84 50' fill='none' stroke='%23c8102e' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="static/css/style.css">
+
+<script>
+  (function () {
+    var t = localStorage.getItem("mc-theme");
+    document.documentElement.setAttribute(
+      "data-theme", t || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
+    var l = localStorage.getItem("mc-lang") || "en";
+    document.documentElement.setAttribute("data-lang", l);
+    if (l === "zh") document.documentElement.setAttribute("lang", "zh-CN");
+  })();
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ScholarlyArticle",
+  "name": "MetaCaster: Meta-Harness-Optimized Agent for End-to-End Few-Shot Learning of Lightweight Time Series Forecasters",
+  "author": [
+    {"@type":"Person","name":"ChengAo Shen"}, {"@type":"Person","name":"Wenchao Yu"},
+    {"@type":"Person","name":"Fangyu Wu"},    {"@type":"Person","name":"Dongjin Song"},
+    {"@type":"Person","name":"Hanghang Tong"},{"@type":"Person","name":"Dongsheng Luo"},
+    {"@type":"Person","name":"Wei Cheng"},    {"@type":"Person","name":"Haifeng Chen"},
+    {"@type":"Person","name":"Jingchao Ni"}
+  ],
+  "url": "https://d2i-group.github.io/metacaster/",
+  "sameAs": "https://arxiv.org/abs/2608.23473"
+}
+</script>
+</head>
+
+<body>
+
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="wordmark" href="#top">MetaCaster</a>
+    <div class="nav-links">
+      <a href="#overview" data-zh="概览">Overview</a>
+      <a href="#method" data-zh="方法">Method</a>
+      <a href="#results" data-zh="结果">Results</a>
+      <a href="#analysis" data-zh="分析">Analysis</a>
+      <a href="#library" data-zh="模型库">Library</a>
+      <a href="#cite" data-zh="引用">Cite</a>
+    </div>
+    <div class="nav-tools">
+      <button class="lang-btn" id="lang-toggle" aria-label="Switch language">
+        <span class="lang-en">中文</span><span class="lang-zh">EN</span>
+      </button>
+      <button class="theme-btn" id="theme-toggle" aria-label="Switch colour theme">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+      <button class="menu-btn" id="menu-toggle" aria-label="Sections" aria-expanded="false">
+        <svg class="icon-bars" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        <svg class="icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="tags">
+    <span class="tag accent" data-zh="EMNLP 2026 · 主会">EMNLP 2026 · Main Conference</span>
+    <span class="tag" data-zh="时间序列预测">Time Series Forecasting</span>
+    <span class="tag" data-zh="大模型智能体">LLM Agents</span>
+    <span class="tag" data-zh="小样本学习">Few-Shot Learning</span>
+  </div>
+
+  <h1>MetaCaster</h1>
+  <p class="standfirst" data-zh="面向轻量级时间序列预测器端到端小样本学习的<br class=&quot;lb&quot;>元 Harness 优化智能体">
+    Meta-Harness-Optimized Agent for End-to-End<br class="lb">
+    Few-Shot Learning of Lightweight Time Series Forecasters
+  </p>
+
+  <p class="people">
+    <a href="https://chengaoshen.com/">ChengAo Shen</a><sup>1</sup>,
+    <a href="https://www.nec-labs.com/research/data-science-system-security/people/wenchao-yu/">Wenchao Yu</a><sup>2</sup>,
+    Fangyu Wu<sup>3</sup>,
+    <a href="https://songdj.github.io/">Dongjin Song</a><sup>4</sup>,
+    <a href="http://tonghanghang.org/">Hanghang Tong</a><sup>5</sup>,
+    <a href="https://dluoedu.github.io/">Dongsheng Luo</a><sup>6</sup>,
+    <a href="https://sites.google.com/site/weichengunc/welcome-to-wei-chengs-homepage">Wei Cheng</a><sup>2</sup>,
+    <a href="https://www.nec-labs.com/research/data-science-system-security/people/haifeng-chen/">Haifeng Chen</a><sup>2</sup>,
+    <a href="https://nijingchao.github.io/">Jingchao Ni</a><sup>1</sup>
+  </p>
+  <p class="places" data-zh="<sup>1</sup>休斯敦大学 &nbsp; <sup>2</sup>NEC 美国实验室 &nbsp; <sup>3</sup>滑铁卢大学 &nbsp; <sup>4</sup>康涅狄格大学 &nbsp; <sup>5</sup>伊利诺伊大学厄巴纳‑香槟分校 &nbsp; <sup>6</sup>新加坡管理大学">
+    <sup>1</sup>University of Houston &nbsp; <sup>2</sup>NEC Labs &nbsp;
+    <sup>3</sup>University of Waterloo &nbsp; <sup>4</sup>University of Connecticut &nbsp;
+    <sup>5</sup>University of Illinois at Urbana-Champaign &nbsp;
+    <sup>6</sup>Singapore Management University
+  </p>
+
+  <div class="actions">
+    <a class="btn primary" href="https://arxiv.org/pdf/2608.23473">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+      <span data-zh="论文">Paper</span>
+    </a>
+    <a class="btn" href="https://arxiv.org/abs/2608.23473">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      arXiv
+    </a>
+    <a class="btn" href="https://github.com/D2I-Group/metacaster">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.73.5.5 5.73.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.2 1.77 1.2 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.19-3.1-.12-.3-.52-1.47.11-3.06 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.24 2.76.12 3.05.74.82 1.19 1.85 1.19 3.11 0 4.43-2.7 5.41-5.27 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"/></svg>
+      <span data-zh="代码">Code</span>
+    </a>
+    <a class="btn" href="#cite">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h4v6a4 4 0 0 1-4 4M15 7h4v6a4 4 0 0 1-4 4"/></svg>
+      BibTeX
+    </a>
+  </div>
+
+  <a class="scroll-cue" href="#overview" aria-label="Scroll to the overview">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
+  </a>
+</header>
+
+<section class="band" id="overview">
+  <div class="band-inner">
+    <div class="band-label" data-zh="概览">Overview</div>
+    <div class="band-body">
+      <h2 data-zh="智能体不做预测，而是造出预测器">Agents that build forecasters, not forecasts</h2>
+
+      <div class="prose">
+        <p data-zh="时间序列预测正在向多模态与智能体化演进，但在资源受限的场景中使用基础模型仍不经济，这类场景更需要紧凑、专用的预测器。然而轻量级预测器通常需要大量训练数据，这限制了它们在数据稀缺、积累缓慢或涉及隐私的领域中的应用。为破解这一两难，我们研究<strong>轻量级预测器的小样本学习</strong>这一具有挑战性的问题。">
+          Time series forecasting is evolving toward multimodal and agentic settings, yet using
+          foundation models remains uneconomical in resource-constrained scenarios, where compact,
+          specialized forecasters are more desirable. However, lightweight forecasters typically
+          require substantial training data, limiting their use in domains with scarce, slowly
+          accumulated, or privacy-sensitive time series. To address this dilemma, we investigate the
+          challenging problem of <strong>few-shot learning for lightweight forecasters</strong>.
+        </p>
+        <p data-zh="我们提出 <strong>MetaCaster</strong>，一个元 Harness 优化的多智能体框架，它以智能体化的数据生成，仅凭少量样本与文本上下文自动训练出专用的轻量级预测器。本工作揭示了一种新的预测范式：<strong>智能体不再充当预测器，而是作为中间工程师</strong>，为部署准备高效的、面向具体任务的预测器。">
+          We propose <strong>MetaCaster</strong>, a meta-harness-optimized multi-agent framework that
+          uses agentic data generation to automatically train specialized lightweight forecasters from
+          only a few examples and textual contexts. Our work highlights a new TSF paradigm in which
+          <strong>agents act not as forecasters but as intermediary engineers</strong> that prepare
+          efficient, task-specific forecasters for deployment.
+        </p>
+        <p data-zh="与追求数据真实性的生成模型不同，MetaCaster 生成数据的目标是让在其上训练的预测器，与在目标域中等量真实数据上训练的预测器表现相当。在 18 个数据集、23 个最先进的轻量级预测器和 14 个基线上的实验表明，MetaCaster 在保持高质量预测性能的同时，兼具数据效率与计算效率。">
+          Unlike existing generative models that focus on data realism, MetaCaster generates data to
+          ensure that forecasters trained on it perform comparably to those trained on real data of
+          the same size in the target domain. Experiments on 18 datasets, 23 state-of-the-art
+          lightweight forecasters, and 14 baselines demonstrate that MetaCaster achieves both data
+          efficiency and computational efficiency while maintaining high-quality TSF performance.
+        </p>
+      </div>
+
+      <figure>
+      <div class="plate">
+      <img src="assets/fig1.png" alt="Comparison of different paradigms of using LLMs for time series forecasting.">
+      </div>
+      <figcaption data-zh="不同的大模型用于时间序列预测的范式比较。MetaCaster 为本文提出的模型。">
+      Comparison of different paradigms of using LLMs for TSF. MetaCaster is the proposed model.
+      </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="method">
+  <div class="band-inner">
+    <div class="band-label" data-zh="方法">Method</div>
+    <div class="band-body">
+      <h2 data-zh="三个智能体，一份交付物">Three agents, one deliverable</h2>
+
+      <div class="run-in">
+        <p data-zh="MetaCaster 依据 {𝒟<sub>sup</sub>, 𝖢} 中有限的数据生成一个充分的数据集 𝒟̄，再将其划分为训练集与验证集用于训练预测器。为实现智能体优化，我们采用元 Harness 策略，框架由三个部分组成。">
+          MetaCaster generates a sufficient dataset 𝒟̄ from the limited data in
+          {𝒟<sub>sup</sub>, 𝖢}, and then splits 𝒟̄ into a training set and a validation set for
+          training the forecasters. To enable agent optimization, it adopts a meta-harness strategy
+          built from three components.
+        </p>
+        <p data-zh="<b>MGAgent</b> · 元生成器。它以一个可替换的大模型为核心。大模型并不直接生成时间序列，而是通过其 Harness 创建一个 <i>TS-Generator</i> 程序，把与该领域相关的知识、规则和模型整合进去，从而绕开大模型在直接推断时间序列上的能力局限，转而发挥它在规划、推理和编码上的长处——这正是“Meta-”前缀的由来。收到 {𝒟<sub>sup</sub>, 𝖢} 后，MGAgent 先分析 𝒟<sub>sup</sub> 中的多元时间序列，再创建 TS-Generator 生成 𝒟̄，最后执行质量检查；全部通过则接受，否则回到上一步修订 TS-Generator。">
+          <b>MGAgent</b> the meta-generator. It is centered on a replaceable LLM. Rather than
+          generating time series directly, the LLM uses its Harness to create a <i>TS-Generator</i>
+          program that integrates domain-specific knowledge, rules, and models pertinent to the
+          domain, circumventing the LLM's limited capability in direct time series inference. Instead
+          it exploits the LLM's strengths in planning, reasoning, and coding — hence the "Meta-"
+          prefix. Upon receiving {𝒟<sub>sup</sub>, 𝖢}, MGAgent analyzes the series in
+          𝒟<sub>sup</sub>, creates the TS-Generator to produce 𝒟̄, and performs quality checks. It
+          accepts 𝒟̄ if all checks pass; otherwise it returns to revise the TS-Generator.
+        </p>
+        <p data-zh="<b>FTAgent</b> · 预测器训练器。它按真实划分的比例把 𝒟̄ 切成训练集与验证集，调度算力训练预测器，并在测试集上评估，产出训练好的预测器、评估指标和训练报告。它为每个预测器编写带超参数网格搜索的训练程序，把 (预测器, 超参数, 数据集) 三元组组织成队列，分配可用 GPU 以最大并行度执行；训练期间监控进程、遇错自行修复、恢复中断的任务，无需人工介入。">
+          <b>FTAgent</b> the forecaster trainer. It splits 𝒟̄ into training and validation sets
+          according to the real partition sizes, orchestrates computational resources to train the
+          forecasters, and evaluates them on the test set, producing trained forecasters, evaluation
+          metrics, and training reports. It composes programs that train each forecaster with a grid
+          search of hyperparameters, organizes (forecaster, hyperparameter, dataset) triplets into a
+          queue, and assigns available GPUs for maximally parallel execution — monitoring processes,
+          resolving errors, and recovering interrupted jobs without human intervention.
+        </p>
+        <p data-zh="<b>HPAgent</b> · Harness 提议者，即元 Harness。Harness 中的系统提示词与技能决定了 MGAgent 的关键行为，因此我们冻结大模型，把它们作为可训练参数 θ。HPAgent 通过三个阶段监管整条流水线：自主规划的分析、诊断、更新。它更依赖长期记忆，其中跨轮次保存了数据集快照、评估指标、训练日志、分析与诊断结果、θ 更新记录等；这份记忆使有害更新可被回滚，并让 HPAgent 在优化结束时输出最优的 θ。">
+          <b>HPAgent</b> the harness proposer, the meta-harness. Since the system prompt and skills
+          define the key behavior of MGAgent, the LLM is frozen and they are used as the trainable
+          parameters θ. HPAgent oversees the entire pipeline through three stages: self-planned
+          analysis, diagnosis, and update. It relies heavily on long-term memory, which stores dataset
+          snapshots, evaluation metrics, training logs, analysis and diagnosis results, and θ update
+          logs across epochs. This memory enables rollback of harmful updates and allows HPAgent to
+          output the best θ at the end of optimization.
+        </p>
+      </div>
+
+      <figure>
+        <div class="plate">
+          <img src="assets/fig2.png" alt="An illustration of the harness optimization framework of the proposed MetaCaster system.">
+        </div>
+        <figcaption data-zh="MetaCaster 系统的 Harness 优化框架示意。">
+          An illustration of the harness optimization framework of the proposed MetaCaster system.
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="results">
+  <div class="band-inner">
+    <div class="band-label" data-zh="结果">Results</div>
+    <div class="band-body">
+      <h2 data-zh="30 组数据集–预算设定中，19 组取得最优 MSE">Best MSE in 19 of 30 dataset–budget settings</h2>
+
+      <div class="prose">
+        <p data-zh="下表对比生成模型、增强方法与 MetaCaster 的 MSE 结果。我们从 LT-Lib 中随机留出 3 个预测器，报告其余 20 个的平均性能；留出的预测器用于考察 MetaCaster 对未见预测器的泛化能力。表中同时给出用 K-shot 支持集 𝒟<sub>sup</sub> 和完整真实训练集 𝒟<sub>tr</sub> 训练的结果，分别作为性能的下界与上界参考。">
+          The table compares MSE across generation models, augmentation methods, and MetaCaster. We
+          randomly hold out 3 forecasters from LT-Lib and report the average performance over the
+          remaining 20; the held-out forecasters are used to assess generalization to unseen
+          forecasters. The table also reports forecasters trained with the K-shot support set
+          𝒟<sub>sup</sub> and with the full set 𝒟<sub>tr</sub>, serving as lower and upper performance
+          references.
+        </p>
+        <p data-zh="几点观察：MetaCaster 在多数情况下优于生成／增强基线，说明面向预测优化数据生成是有益的；性能随 K 增大而提升，体现了对小样本的有效利用；当 K ≥ 30 时，MetaCaster 接近甚至超过 𝒟<sub>tr</sub>，提示原始数据可能含噪，而优化过的数据能改善训练；在 K = 10 的极端情形下仍具竞争力；面对更难的 OOD 数据集，它同样泛化良好并普遍优于基线。">
+          Several observations: MetaCaster outperforms the generation and augmentation baselines in
+          most cases, demonstrating the benefit of optimizing data generation for forecasting; its
+          performance improves with larger K, showing effective few-shot utilization; when K ≥ 30 it
+          approaches or even surpasses 𝒟<sub>tr</sub>, suggesting that raw data may be noisy and
+          optimized data can improve training; at K = 10 it remains competitive; and despite the
+          increased difficulty it generalizes well to OOD datasets, where it generally outperforms
+          the baselines.
+        </p>
+      </div>
+
+      <div>
+        <div class="controls">
+          <div class="ctl">
+            <span class="ctl-label" data-zh="小样本预算 K">Few-shot budget K</span>
+            <div class="choices" id="k-seg">
+              <button data-k="10">10</button>
+              <button data-k="30" aria-pressed="true">30</button>
+              <button data-k="50">50</button>
+            </div>
+          </div>
+          <div class="ctl">
+            <span class="ctl-label" data-zh="语料">Corpus</span>
+            <div class="choices" id="corpus-seg">
+              <button data-c="all" data-zh="全部">Both</button>
+              <button data-c="IND" data-zh="域内">In-domain</button>
+              <button data-c="OOD" data-zh="域外">Out-of-domain</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="tablewrap">
+          <table class="data" id="main-table"><thead></thead><tbody></tbody></table>
+        </div>
+        <p class="note" data-zh="MSE 越低越好。M4 使用实例归一化 MSE。">
+          Lower MSE is better. M4 uses instance-normalized MSE.
+        </p>
+      </div>
+
+      <figure>
+        <div class="plate">
+          <img src="assets/tsci_bars.svg" alt="Comparing the selected forecasters of the agent pipelines MetaCaster and TimeScientist.">
+        </div>
+        <figcaption data-zh="比较 MetaCaster 与 TimeScientist 两个智能体流水线所选出（训练）的预测器。TimeScientist 不具备数据生成能力，难以训练出可泛化的预测器，其性能也不随 K 增长。">
+          Comparing the selected (trained) forecasters of the agent pipelines MetaCaster and
+          TimeScientist. Without data generation capability, TimeScientist struggles to train
+          generalizable forecasters and its performance does not scale with K.
+        </figcaption>
+      </figure>
+
+      <div class="pair">
+        <figure style="--ar:2.2373">
+          <div class="plate">
+            <img src="assets/fig3.svg" alt="Performance distribution over all forecasters in LT-Lib and all datasets in both corpora.">
+          </div>
+          <figcaption data-zh="性能分布。每个点代表一个预测器在一个测试集上的表现，覆盖 LT-Lib 中全部预测器以及 IND 与 OOD 两个语料中的全部数据集。">
+            Performance distribution. Each dot represents the performance of a forecaster on a test
+            set, covering all forecasters in LT-Lib and all datasets in both of the IND and OOD
+            corpora.
+          </figcaption>
+        </figure>
+
+        <figure style="--ar:1.2214">
+          <div class="plate">
+            <img src="assets/fig4.svg" alt="Comparing MetaCaster with time series foundation models on the Solar dataset.">
+          </div>
+          <figcaption data-zh="在 Solar 数据集上比较 MetaCaster 与时间序列基础模型。此处运行时选出的是 MixLinear（243 参数）；在性能相当的前提下，延迟最多降低 10<sup>3</sup> 倍，参数量最多减少 10<sup>5</sup> 倍。">
+            Comparing MetaCaster with TSFMs on the Solar dataset. Here MixLinear, at 243 parameters,
+            is selected at runtime; at comparable performance this is up to 10<sup>3</sup>× lower
+            latency and 10<sup>5</sup>× fewer parameters.
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="analysis">
+  <div class="band-inner">
+    <div class="band-label" data-zh="分析">Analysis</div>
+    <div class="band-body">
+      <h2 data-zh="起决定作用的是 Harness，而非大模型骨干">The Harness, not the backbone, carries the result</h2>
+
+      <div class="prose">
+        <p data-zh="消融实验在 K = 30 下以平均 MSE 进行，MetaCaster 为原始模型。其一，将面向预测的优化目标替换为 MMD 与 Wasserstein 距离，直接对齐生成集与真实集，以考察面向预测优化的作用；其二，移除文本上下文 𝖢<sub>m</sub>，评估其贡献；其三，考察不同大模型的影响。">
+          The ablation uses averaged MSE with K = 30, with MetaCaster as the original model. First, we
+          study the effect of forecasting-oriented optimization by replacing the objective with MMD
+          and Wasserstein distances, which directly align the generated set with the authentic set.
+          Second, we remove the contextual cues 𝖢<sub>m</sub> to evaluate their contribution. Third,
+          we examine the impact of different LLMs.
+        </p>
+        <p data-zh="最小化数据分布差异通常会损害性能，因为它与预测目标并不直接对齐。文本上下文至关重要，它引导 MGAgent 选取与领域相关的知识来生成时间序列。有意思的是，不同大模型在多数情况下结果相当，说明起关键作用的是 Harness 而非大模型骨干，这与已有发现一致。GPT-5.3-Codex 虽在部分数据集上占优，但在 ETTm1 与 USbirths 上不稳定，整体结果更差；因此我们采用 GPT-5.4 作为默认大模型，取其表现稳定。">
+          Minimizing data distribution discrepancy generally degrades performance, as it is not
+          directly aligned with the forecasting objective. Contextual cues are crucial, as they guide
+          MGAgent in selecting domain-relevant knowledge for generating time series. Interestingly,
+          different LLMs yield comparable results in many cases, suggesting the Harness — rather than
+          the LLM backbone — is the key factor in MetaCaster, consistent with prior findings. Although
+          <code>GPT-5.3-Codex</code> wins in some cases, it is unstable on datasets such as ETTm1 and
+          USbirths, leading to worse overall results; thus we adopt <code>GPT-5.4</code> as the
+          default LLM for its consistent performance.
+        </p>
+      </div>
+
+      <div>
+        <div class="tablewrap">
+          <table class="data" id="ablation-table"><thead></thead><tbody></tbody></table>
+        </div>
+        <p class="note" data-zh="“Overall” 为跨数据集聚合的归一化 MSE。计算效率、Token 用量、性能稳健性、性能随 K 的变化、排名靠前的预测器表现，以及生成时间序列与数据分布的可视化，均见论文附录。">
+          <b>Overall</b> is the normalized MSE aggregated across datasets. Computational efficiency,
+          token usage, robustness of performance, performance change with respect to K, performance of
+          top-ranked forecasters, and visualizations of the generated time series and data
+          distribution are reported in the paper's appendices.
+        </p>
+      </div>
+
+      <h3 class="sub" data-zh="案例研究">Case study</h3>
+
+      <div class="prose">
+        <p data-zh="Hinge loss 在 8 个 Harness 优化轮次中的演化显示，MetaCaster 收敛很快，最终 Harness 取自第 5 轮。下图跟踪 MGAgent 与 HPAgent 在 alibaba_cluster_2018 数据集上从第 4 轮到第 5 轮的过程。MGAgent 分析小样本示例 𝒟<sub>sup</sub>、检查统计量、检索关于 CPU 与内存这两个变量的领域知识，并据此构造 TS-Generator。">
+          The hinge loss evolves over 8 harness optimization epochs, where MetaCaster converges
+          quickly and selects the final Harness from epoch 5. The traces below follow MGAgent and
+          HPAgent from epoch 4 to 5 on the <i>alibaba_cluster_2018</i> dataset. MGAgent analyzes the
+          few-shot examples 𝒟<sub>sup</sub>, inspects statistics, retrieves domain knowledge about the
+          two variates CPU and memory, and constructs a TS-Generator.
+        </p>
+        <p data-zh="HPAgent 借助记忆发现第 4 轮的性能退化，随后执行分析与诊断。分析环节调用与问题相关的分析工具，依据 MGAgent 的推理轨迹与 FTAgent 的训练日志展开；诊断环节将变量间相关性被破坏定位为根因。它随即更新 MGAgent 的技能，得到改进后的 TS-Generator——加强了 CPU 与内存的相关性，并补充了一致性检查。于是第 5 轮生成的时间序列具备相关性，比第 4 轮更贴合小样本示例。">
+          HPAgent detects the performance degradation at epoch 4 via memory, then performs Analysis
+          and Diagnosis. The Analysis uses analytical tools pertinent to the issue identified in the
+          reasoning traces of MGAgent and the training logs of FTAgent. The Diagnosis identifies
+          broken inter-variate correlation as the root cause. It then updates MGAgent's skills,
+          leading to an improved TS-Generator that strengthens the CPU–memory correlation and adds
+          consistency checks. Consequently, epoch 5 produces correlated time series that are more
+          compliant with the few-shot examples than epoch 4.
+        </p>
+        <p data-zh="这只是一次简单的 Harness 更新。实际上 MetaCaster 的优化更为复杂，会并发处理 Harness 训练语料中的 B = 8 个数据集。最终产出的是训练好的轻量级预测器，而不是生成的时间序列。">
+          This example illustrates a simple Harness update. In fact, MetaCaster's optimization is more
+          complex and deals with B = 8 datasets in the harness training corpus concurrently. The final output is a trained
+          lightweight forecaster rather than the generated time series.
+        </p>
+      </div>
+
+      <figure>
+        <div class="plate">
+          <img src="assets/fig5.png" alt="An illustration of harness optimization by MetaCaster, with the hinge loss and key agent traces.">
+        </div>
+        <figcaption data-zh="MetaCaster 的 Harness 优化示意：优化迭代过程中的 hinge loss，以及 MGAgent 与 HPAgent 在 alibaba_cluster_2018 数据集上从第 4 轮到第 5 轮的关键轨迹。">
+          An illustration of Harness optimization by MetaCaster: the hinge loss during optimization
+          iterations, and key traces of MGAgent and HPAgent from epoch 4 to 5 on the
+          <i>alibaba_cluster_2018</i> dataset.
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="library">
+  <div class="band-inner">
+    <div class="band-label" data-zh="模型库">Library</div>
+    <div class="band-body">
+      <h2 data-zh="LT-Lib：23 个轻量级预测器，统一接口">LT-Lib: 23 lightweight forecasters behind one interface</h2>
+
+      <div class="prose">
+        <p data-zh="我们收集了 2022 至 2026 年间提出的 23 个最先进的轻量级预测器，涵盖线性层模型（如 MixLinear）、基于 MLP 的预测器（如 TSMixer）与频域模型（如 FITS）。它们的规模远小于最先进的 Transformer 预测器（如 PatchTST，约 3.2M）与时间序列基础模型（如 Chronos，约 700M）。我们以统一接口将它们编入 LT-Lib，便于 FTAgent 发起训练调用。">
+          We collect 23 state-of-the-art lightweight forecasters proposed from 2022 to 2026, including
+          linear-layer models such as <code>MixLinear</code>, MLP-based forecasters such as
+          <code>TSMixer</code>, and frequency-domain models such as <code>FITS</code>. Their sizes are
+          much smaller than state-of-the-art Transformer-based forecasters
+          (<code>PatchTST</code>, ≈3.2M) and TSFMs (<code>Chronos</code>, ≈700M). We compile them in
+          LT-Lib with a unified interface to facilitate training calls in FTAgent.
+        </p>
+      </div>
+
+      <div>
+        <div class="controls">
+          <div class="ctl">
+            <span class="ctl-label" data-zh="族类">Family</span>
+            <div class="choices" id="family-filter"></div>
+          </div>
+        </div>
+
+        <div class="tablewrap">
+          <table class="data" id="ltlib-table">
+            <thead>
+              <tr>
+                <th class="name" data-zh="预测器">Forecaster</th>
+                <th class="left" data-zh="族类">Family</th>
+                <th class="sortable" data-sort="params" data-zh="参数量">Parameters</th>
+                <th class="sortable" data-sort="macs">MACs (M)</th>
+                <th class="sortable" data-sort="lat" data-zh="延迟 (ms)">Latency (ms)</th>
+                <th class="sortable" data-sort="vram" data-zh="峰值显存 (MB)">Peak VRAM (MB)</th>
+                <th class="left" data-zh="出处">Reference</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="note" data-zh="回看窗口 336、预测步长 192 下的实测结果；点击数值列可排序。">
+          Profiled with a look-back of 336 and a horizon of 192; click a numeric column to sort.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="cite">
+  <div class="band-inner">
+    <div class="band-label" data-zh="引用">Citation</div>
+    <div class="band-body">
+      <h2 data-zh="引用本文">Cite this work</h2>
+      <div class="cite">
+        <div class="cite-head">
+          BibTeX
+          <button class="copy" id="copy-bib" data-zh="复制">Copy</button>
+        </div>
+<pre id="bibtex">@inproceedings{shen2026metacaster,
+  title     = {MetaCaster: Meta-Harness-Optimized Agent for End-to-End Few-Shot Learning of Lightweight Time Series Forecasters},
+  author    = {Shen, ChengAo and Yu, Wenchao and Wu, Fangyu and Song, Dongjin and Tong, Hanghang and Luo, Dongsheng and Cheng, Wei and Chen, Haifeng and Ni, Jingchao},
+  booktitle = {Proceedings of the 2026 Conference on Empirical Methods in Natural Language Processing},
+  year      = {2026}
+}</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-mark">MetaCaster</div>
+      <p data-zh="EMNLP 2026 · 休斯敦大学 D2I 组">
+        EMNLP 2026 · D2I Group, University of Houston
+      </p>
+      <p class="footer-contact">
+        <a href="mailto:cshen9@uh.edu">cshen9@uh.edu</a> ·
+        <a href="https://github.com/D2I-Group/metacaster/issues" data-zh="提交 issue">Open an issue</a>
+      </p>
+    </div>
+
+    <div class="footer-links">
+      <div>
+        <h3 data-zh="论文">Paper</h3>
+        <ul>
+          <li><a href="https://arxiv.org/abs/2608.23473">arXiv:2608.23473</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 data-zh="代码">Code</h3>
+        <ul>
+          <li><a href="https://github.com/D2I-Group/metacaster">GitHub</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-related">
+      <h3 data-zh="D2I 组的其他工作">More from the D2I Group</h3>
+      <ul class="related">
+        <li>
+          <a href="https://github.com/D2I-Group/dmmv">Multi-Modal View Enhanced Large Vision Models for Long-Term Time Series Forecasting</a>
+          <span class="meta">NeurIPS 2025 · <a href="https://arxiv.org/abs/2505.24003">arXiv:2505.24003</a></span>
+        </li>
+        <li>
+          <a href="https://github.com/D2I-Group/awesome-vision-time-series">Harnessing Vision Models for Time Series Analysis: A Survey</a>
+          <span class="meta">IJCAI 2025 · <a href="https://www.arxiv.org/abs/2502.08869">arXiv:2502.08869</a></span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<script src="static/js/data.js"></script>
+<script src="static/js/main.js"></script>
+</body>
+</html>
